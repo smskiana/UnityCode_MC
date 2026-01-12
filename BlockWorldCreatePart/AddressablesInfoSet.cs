@@ -14,16 +14,18 @@ public class AddressablesInfoSet<T> where T : Info
     private AsyncOperationHandle<IList<T>> handle;
     [ShowInInspector]
     public bool IsLoaded { get => handle.IsValid() && handle.Status == AsyncOperationStatus.Succeeded; }
-
-    /// <summary>
-    /// 异步加载所有 T 类型的 Info
-    /// </summary>
-    public async Task LoadAll(string label)
+    private Task loadTask;
+    public Task LoadAll(string label)
     {
-        if (IsLoaded) return;
+        if (loadTask != null)
+            return loadTask;
 
+        loadTask = InternalLoadAll(label);
+        return loadTask;
+    }
+    private async Task InternalLoadAll(string label)
+    {
         dic.Clear();
-
         handle = Addressables.LoadAssetsAsync<T>(label, null);
         IList<T> assets = await handle.Task;
 
@@ -40,6 +42,8 @@ public class AddressablesInfoSet<T> where T : Info
     /// </summary>
     public bool TryFind(int id, out T info)
     {
+        info = default;
+        if(!IsLoaded) return false;
         return dic.TryGetValue(id, out info);
     }
 

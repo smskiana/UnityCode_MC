@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -8,16 +8,39 @@ namespace Store
     {
         public static InfoStorer Instance;
         [SerializeField]private AddressablesInfoSet<BlocksInfo> blockInfos = new();
-        public Task BlockLoadTask { get; private set; }
+        private Task blockLoadTask;
         public bool IsBlockLoaded {  get => BlockInfos.IsLoaded; }
         public AddressablesInfoSet<BlocksInfo> BlockInfos { get => blockInfos;}
 
-        public async void Awake()
+        public void Awake()
         {
-            Instance = this;
-            BlockLoadTask = BlockInfos.LoadAll("BlockInfo");
-            await BlockLoadTask;
-            BlockLoadTask = null;
+            if (Instance)
+            {
+                Destroy(this.gameObject);
+                return;
+            }
+                Instance = this;
+           _=InitializeAsync();   
+        }
+        private async Task InitializeAsync()
+        {
+            try
+            {
+                await Initialize();
+                blockLoadTask = null;
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+        public Task Initialize()
+        {
+            if (IsBlockLoaded) return Task.CompletedTask;
+            if (blockLoadTask != null)
+                return blockLoadTask;
+            blockLoadTask = BlockInfos.LoadAll("BlockInfo");
+            return blockLoadTask;
         }
         public bool TryFindBlock(int key,out BlocksInfo info)
         {
