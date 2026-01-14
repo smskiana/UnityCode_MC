@@ -54,7 +54,7 @@ namespace _3C.StateMachines
                  {
                      if (Current.CanBeInterrupt(value))
                      {
-                     switchLocked = false ;
+                         switchLocked = false ;
                      }
                      pushState = value;
                  }
