@@ -36,7 +36,13 @@ namespace _3C.StateMachines
                     return;
                 }
                 if (Current.CanBeNextstate(value))
-                    nextState = value;             
+                 {
+                     if (Current.CanBeInterrupt(value))
+                     {
+                         switchLocked = false ;
+                     }
+                         nextState = value;
+                }    
             } }
         public string PushState { get =>pushState; set {
                 if (value == null)
@@ -44,8 +50,14 @@ namespace _3C.StateMachines
                     pushState = null;
                     return;
                 }
-                if(Current.CanBeNextstate(value))
-                    pushState = value;
+                 if (Current.CanBeNextstate(value))
+                 {
+                     if (Current.CanBeInterrupt(value))
+                     {
+                     switchLocked = false ;
+                     }
+                     pushState = value;
+                 }
             } }
         public bool NeedPop {  get =>needPop; set {
                 if (statesStack.Count > 1)
